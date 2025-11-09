@@ -8,9 +8,14 @@ Usage:
 from flask import Flask, request, jsonify
 from typing import Dict, Any
 import os
+import sys
 from openai import OpenAI
 from pydantic import BaseModel, create_model
 import json
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
 
@@ -76,7 +81,7 @@ def api_structured_completion():
             "additionalProperties": false
         },
         "schema_name": "math_answer",
-        "model": "gpt-4o-2024-08-06"  // optional
+        "model": "gpt-5"  // optional
     }
     """
     try:
@@ -90,7 +95,7 @@ def api_structured_completion():
         
         # Optional fields with defaults
         schema_name = data.get('schema_name', 'response_schema')
-        model = data.get('model', 'gpt-4o-2024-08-06')
+        model = data.get('model', 'gpt-5')
         
         # Execute structured completion
         result = structured_completion(
@@ -120,11 +125,15 @@ def health_check():
 
 
 if __name__ == '__main__':
-    import os
-    
     # Check if API key is set
-    if not os.environ.get("OPENAI_API_KEY"):
-        print("Warning: OPENAI_API_KEY environment variable not set!")
-    
-    # Run server
-    app.run(host='0.0.0.0', port=7070, debug=True)
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key or api_key == "your_openai_api_key_here":
+        print("ERROR: OPENAI_API_KEY not configured properly!")
+        print("Please set a valid OpenAI API key in your .env file")
+        sys.exit(1)
+
+    # Get port from environment or use default
+    port = int(os.environ.get("PORT", 7070))
+
+    # Run server (debug=False in production)
+    app.run(host='0.0.0.0', port=port, debug=False)
