@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  structured-outputs-api:
+    container_name: structured-outputs-api
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    env_file:
+      - .env
+    environment:
+      - PORT=7070
+      - TZ=UTC
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "7070:7070"
+    expose:
+      - "7070"
+    restart: unless-stopped
+    networks:
+      - mcp-shared
+    # healthcheck:
+    #   test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:7070/health')"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 40s
+
+networks:
+  mcp-shared:
+    external: true
